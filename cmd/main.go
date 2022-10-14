@@ -2,19 +2,42 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
-	"github.com/checkpoint-restore/go-criu/v6"
+	"github.com/ubombar/container-migration-demo/pkg/app"
 )
 
+func displayMenu() {
+	fmt.Println("'m' and '<int>' (migrate the process with specified pid) 'q' (quit) :")
+}
+
+func migrateProcess(pif uint32) {
+
+}
+
 func main() {
-	c := criu.MakeCriu()
+	appClient := app.NewClient()
+	var exitRequested bool = false
 
-	version, err := c.GetCriuVersion()
+	for !exitRequested {
+		displayMenu()
 
-	if err != nil {
-		fmt.Println("criu cannot found")
-		return
+		input := appClient.GetInput()
+
+		switch input {
+		case "q":
+			exitRequested = true
+		case "m":
+			pidText := appClient.GetInput()
+
+			pid, err := strconv.Atoi(pidText)
+
+			if err == nil {
+				appClient.MigrateContainer(int32(pid))
+			} else {
+				fmt.Println("Cannot cast the input to integer try again")
+			}
+		}
 	}
 
-	fmt.Printf("criu version: %v\n", version)
 }
